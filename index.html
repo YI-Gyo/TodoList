@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.4.2/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.4.2/react-dom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.21.1/babel.min.js"></script>
+    <link rel="stylesheet" href="./index.css">
+    <meta charset="utf-8" />
+</head>
+
+<body>
+<div id="root"></div>
+<div id="root1"></div>
+
+<script type="text/babel">
+
+    class TodoItem extends React.Component {
+        constructor(props) {
+            super(props);
+            this.state = { done: false };
+            this.handleToggle = this.handleToggle.bind(this);
+            this.handleDelete = this.handleDelete.bind(this);
+        }
+
+        handleToggle() {
+            this.setState(prevState => ({ done: !prevState.done }));
+        }
+
+        handleDelete() {
+            console.log('handleDelete');
+            this.props.handleDeleteTodo(this.props.index);
+        }
+
+        render() {
+            const style = { textDecoration: this.state.done ? 'line-through' : 'none'};
+            return (
+                <div>
+                    <button onClick={this.handleToggle}>{this.state.done ? 'Undo' : 'Done'}</button>
+                    <span style={style}>{this.props.text}</span>
+                    <button onClick={this.handleDelete}>x</button>
+                </div>
+            );
+        }
+    }
+
+
+
+    function TodoList(props) {
+        return (
+            <div>
+                {props.todos ? props.todos.map((todo, i) =>
+                    <TodoItem handleDeleteTodo={props.handleDeleteTodo} index={i} text={todo.text} key={todo.id}/>) : null}
+            </div>
+        );
+    }
+
+    class UserInput extends React.Component {
+        constructor(props) {
+            super(props);
+            this.state = { userInput: '' };
+            this.handleInputChange = this.handleInputChange.bind(this);
+            this.handleClickAdd = this.handleClickAdd.bind(this);
+        }
+
+        handleInputChange(e) {
+            console.log(e.target.value);
+            this.setState({ userInput: e.target.value });
+        }
+
+        handleClickAdd() {
+            console.log('handleClickAdd');
+            if (this.state.userInput) {
+                this.props.handleAddTodo(this.state.userInput);
+            }
+            this.setState({ userInput: '' });
+        }
+
+        render() {
+            return (
+                <div>
+                    <input type="text" onChange={this.handleInputChange} value={this.state.userInput}/>
+                    <button onClick={this.handleClickAdd}>Add</button>
+                </div>
+            );
+        }
+    }
+
+    class App extends React.Component {
+        constructor(props) {
+            super(props);
+            this.state = { todos: [{ id: 1, text: 'First item'}, { id: 2, text: 'Second item'}] };
+            this.handleAddTodo = this.handleAddTodo.bind(this);
+            this.handleDeleteTodo = this.handleDeleteTodo.bind(this);
+        }
+
+        handleAddTodo(userInput) {
+            console.log(userInput);
+            this.setState((prevState) => {
+                return {
+                    todos: [...prevState.todos, { id: new Date().getTime(), text: userInput }]
+                };
+            });
+        }
+
+        handleDeleteTodo(index) {
+            console.log('handleDeleteTodo', index);
+            this.setState((prevState) => {
+                return {
+                    todos: [...prevState.todos.slice(0, index), ...prevState.todos.slice(index + 1)]
+                };
+            });
+        }
+
+        render() {
+            return (
+                <div>
+                    <TodoList todos={this.state.todos}  handleDeleteTodo={this.handleDeleteTodo} />
+                    <UserInput handleAddTodo={this.handleAddTodo}/>
+                </div>
+            );
+        }
+    }
+
+
+    ReactDOM.render(<App/>, document.getElementById('root'));
+</script>
+</body>
+</html>
